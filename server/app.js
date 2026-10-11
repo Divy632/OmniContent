@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
+const fs = require('fs');
 
 const authRoutes = require('./routes/authRoutes');
 const contentCatalogRoutes = require('./routes/contentCatalogRoutes');
@@ -19,7 +21,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// Health check endpoint (Section 16)
+// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -29,14 +31,30 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API Routes
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/content-types', contentCatalogRoutes);
 app.use('/api/creations', creationRoutes);
 app.use('/api/profiles', profileRoutes);
 
-// 404 Route handler
-app.use('*', (req, res) => {
+// Serve the production-built React frontend
+const clientDistPath = path.resolve(__dirname, '../client/dist');
+
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+
+  // React Router fallback for frontend routes
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
+// API 404 handler
+app.use('/api', (req, res) => {
   res.status(404).json({
     success: false,
     message: `Endpoint ${req.originalUrl} not found.`,
@@ -44,7 +62,16 @@ app.use('*', (req, res) => {
   });
 });
 
-// Global Error Handler
+// General 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Page ${req.originalUrl} not found.`,
+    code: 'NOT_FOUND'
+  });
+});
+
+// Global error handler
 app.use(errorHandler);
 
 module.exports = app;

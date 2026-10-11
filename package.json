@@ -1,0 +1,24 @@
+{
+  "name": "ai-content-creation-platform",
+  "version": "1.0.0",
+  "description": "AI-Powered Universal Content Creation Platform Using the MERN Stack",
+  "scripts": {
+    "start": "node start-dev.js",
+    "dev": "node start-dev.js",
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "test:backend": "cd server && node test-api.js"
+  },
+  "keywords": [
+    "mern",
+    "ai",
+    "content-creation",
+    "react",
+    "express",
+    "mongodb",
+    "node"
+  ],
+  "author": "Final-Year Project Team",
+  "license": "ISC"
+}
